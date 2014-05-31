@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -46,12 +47,17 @@ public class ItemGeoAdapter extends BaseAdapter {
 
         ItemGeo item = items.get(position);
 
-
         TextView nombre = (TextView) vi.findViewById(R.id.nombre);
         nombre.setText(item.getNombre());
 
-        TextView tipo = (TextView) vi.findViewById(R.id.tipo);
-        tipo.setText(item.getTipo());
+        TextView direccion = (TextView) vi.findViewById(R.id.direccion);
+        direccion.setText(item.getDireccion());
+
+        TextView latitud = (TextView) vi.findViewById(R.id.latitud);
+        latitud.setText(item.getLatitud());
+
+        TextView longitud = (TextView) vi.findViewById(R.id.longitud);
+        longitud.setText(item.getLatitud());
 
         return vi;
     }

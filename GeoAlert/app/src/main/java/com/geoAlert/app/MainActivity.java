@@ -33,29 +33,13 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mainListView = (ListView) findViewById( R.id.listView );
+        ListView lv = (ListView)findViewById(R.id.listView);
 
+        ArrayList<ItemGeo> itemsCompra = obtenerItems();
 
-        String[] values = new String[] { "Android", "iPhone", "WindowsMobile",
-                "Blackberry", "WebOS", "Ubuntu", "Windows7", "Max OS X" };
+        ItemGeoAdapter adapter = new ItemGeoAdapter(this, itemsCompra);
 
-        ArrayList<String> planetList = new ArrayList<String>();
-        planetList.addAll( Arrays.asList(values) );
-
-        listAdapter = new ArrayAdapter<String>(this, R.layout.simplerow, planetList);
-
-
-        Log.e("lpx","hola");
-
-        mainListView.setAdapter( listAdapter );
-
-
-
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
-                    .commit();
-        }
+        lv.setAdapter(adapter);
     }
 
 
@@ -79,46 +63,18 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
 
-        public PlaceholderFragment() {
-        }
+    private ArrayList<ItemGeo> obtenerItems() {
+        ArrayList<ItemGeo> items = new ArrayList<ItemGeo>();
 
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            return rootView;
-        }
+        items.add(new ItemGeo(1, "Bar la Atalaya", "Calle Huelva", "3.2222","2.3333", "BAR", "1" ));
+
+        return items;
     }
 
 
-    private class StableArrayAdapter extends ArrayAdapter<String> {
 
-        HashMap<String, Integer> mIdMap = new HashMap<String, Integer>();
 
-        public StableArrayAdapter(Context context, int textViewResourceId,
-                                  List<String> objects) {
-            super(context, textViewResourceId, objects);
-            for (int i = 0; i < objects.size(); ++i) {
-                mIdMap.put(objects.get(i), i);
-            }
-        }
 
-        @Override
-        public long getItemId(int position) {
-            String item = getItem(position);
-            return mIdMap.get(item);
-        }
-
-        @Override
-        public boolean hasStableIds() {
-            return true;
-        }
-
-    }
 
 }
