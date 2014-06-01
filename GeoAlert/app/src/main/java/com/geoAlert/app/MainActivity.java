@@ -1,6 +1,7 @@
 package com.geoAlert.app;
 
 import android.content.Context;
+import android.os.StrictMode;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -17,6 +18,22 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -24,8 +41,8 @@ import java.util.List;
 
 public class MainActivity extends ActionBarActivity {
 
-    private ListView mainListView ;
-    private ArrayAdapter<String> listAdapter ;
+    private String USER_BASE_URL = "https://api.mongolab.com/api/1/databases/geoalert/collections/geopoint?apiKey=WmCmHvlH4oGWeBU2R6DjC06jJdnD8zdx";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,29 +50,81 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        if (android.os.Build.VERSION.SDK_INT > 9) {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+        }
+
         ListView lv = (ListView)findViewById(R.id.listView);
 
-        ArrayList<ItemGeo> itemsCompra = obtenerItems();
 
-        ItemGeoAdapter adapter = new ItemGeoAdapter(this, itemsCompra);
+        try {
 
-        lv.setAdapter(adapter);
+            JSONArray data = new JSONArray(getJSONUrl(USER_BASE_URL));
+
+            if (data!=null) Log.e("errorJSON", data.toString());
+
+            final ArrayList<HashMap<String, String>> MyArrList = new ArrayList<HashMap<String, String>>();
+            HashMap<String, String> map;
+
+            for(int i = 0; i < data.length(); i++){
+
+                  JSONObject c = data.getJSONObject(i);
+
+                  map = new HashMap<String, String>();
+                  map.put("name", c.getString("name"));
+                  Log.e("inpectJSON", c.getString("name"));
+
+                  map.put("direction", c.getString("direction"));
+                  Log.e("inpectJSON", c.getString("direction"));
+
+                  map.put("latitud", c.getString("latitud"));
+                  Log.e("inpectJSON", c.getString("latitud"));
+
+                  map.put("longitud", c.getString("longitud"));
+                  Log.e("inpectJSON", c.getString("longitud"));
+
+                  map.put("type", c.getString("type"));
+                  Log.e("inpectJSON", c.getString("type"));
+
+                  map.put("priority", c.getString("priority"));
+                  Log.e("inpectJSON", c.getString("priority"));
+
+                  MyArrList.add(map);
+           }
+
+
+            for (int i=0;i<MyArrList.size();i++){
+                Log.e("inpectJSON","Nueva GEO");
+                Log.e("inpectJSON", MyArrList.get(i).toString());
+
+            }
+
+            ArrayList<ItemGeo> itemsGeo = obtenerItems(MyArrList);
+            ItemGeoAdapter adapter = new ItemGeoAdapter(this, itemsGeo);
+            lv.setAdapter(adapter);
+
+
+
+        } catch (JSONException e) {
+
+            e.printStackTrace();
+        }
+
+
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        
-        // Inflate the menu; this adds items to the action bar if it is present.
+
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+
         int id = item.getItemId();
         if (id == R.id.action_settings) {
             return true;
@@ -64,15 +133,47 @@ public class MainActivity extends ActionBarActivity {
     }
 
 
-    private ArrayList<ItemGeo> obtenerItems() {
+    private ArrayList<ItemGeo> obtenerItems(ArrayList<HashMap<String, String>> Listaitem) {
         ArrayList<ItemGeo> items = new ArrayList<ItemGeo>();
 
-        items.add(new ItemGeo(1, "Bar la Atalaya", "Calle Huelva", "3.2222","2.3333", "BAR", "1" ));
+        for (int i=0;i<Listaitem.size();i++){
+
+            items.add(new ItemGeo(i,Listaitem.get(i).get("name"),Listaitem.get(i).get("direction"),Listaitem.get(i).get("latitud"),Listaitem.get(i).get("longitud"),
+            Listaitem.get(i).get("type"), Listaitem.get(i).get("priotity") ));
+
+        }
+
 
         return items;
     }
 
 
+    public String getJSONUrl(String url) {
+        StringBuilder str = new StringBuilder();
+        HttpClient client = new DefaultHttpClient();
+        HttpGet httpGet = new HttpGet(url);
+        try {
+            HttpResponse response = client.execute(httpGet);
+            StatusLine statusLine = response.getStatusLine();
+            int statusCode = statusLine.getStatusCode();
+            if (statusCode == 200) {
+                HttpEntity entity = response.getEntity();
+                InputStream content = entity.getContent();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(content));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    str.append(line);
+                }
+            } else {
+                Log.e("Log", "Failed to download result..");
+            }
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return str.toString();
+    }
 
 
 
