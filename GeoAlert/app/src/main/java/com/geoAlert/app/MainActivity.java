@@ -16,6 +16,7 @@ import android.os.Build;
 import android.widget.ListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.TabHost;
 import android.widget.Toast;
 
 import org.apache.http.HttpEntity;
@@ -42,13 +43,33 @@ import java.util.List;
 public class MainActivity extends ActionBarActivity {
 
     private String USER_BASE_URL = "https://api.mongolab.com/api/1/databases/geoalert/collections/geopoint?apiKey=WmCmHvlH4oGWeBU2R6DjC06jJdnD8zdx";
-
+    TabHost tabHost;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        tabHost=(TabHost)findViewById(R.id.tabHost);
+        tabHost.setup();
+
+        TabHost.TabSpec spec1=tabHost.newTabSpec("TAB 1");
+        spec1.setContent(R.id.tab1);
+        spec1.setIndicator("TAB 1");
+
+
+        TabHost.TabSpec spec2=tabHost.newTabSpec("TAB 2");
+        spec2.setIndicator("TAB 2");
+        spec2.setContent(R.id.tab2);
+
+
+        TabHost.TabSpec spec3=tabHost.newTabSpec("TAB 3");
+        spec3.setContent(R.id.tab3);
+        spec3.setIndicator("TAB 3");
+
+        tabHost.addTab(spec1);
+        tabHost.addTab(spec2);
+        tabHost.addTab(spec3);
 
         if (android.os.Build.VERSION.SDK_INT > 9) {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
